@@ -29,7 +29,6 @@ function field_load_more_field_formatter_info_alter(array &$info) {
  * Implements hook_field_formatter_settings_summary_alter().
  */
 function field_load_more_field_formatter_settings_summary_alter(&$summary, $context) {
-  dpm($context);
   $view_mode = $context['view_mode'];
   $field_load_more_enabled = $context['instance']['display'][$view_mode]['settings']['field_load_more_enabled'];
   if ($field_load_more_enabled) {
