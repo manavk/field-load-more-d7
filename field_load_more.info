@@ -1,0 +1,8 @@
+name = Field load more
+description = "Provides configuration to load n items of a multi-valued field with a load more button."
+core = 7.x
+package = Fields
+
+dependencies[] = field_formatter_settings
+scripts[] = js/loader.js
+stylesheets[all][] = css/loader.css

@@ -1,0 +1,103 @@
+<?php
+
+
+/**
+ * Implements hook_help().
+ */
+function field_load_more_help($path, $arg) {
+  switch ($path) {
+    // Main module help for the field_load_more module.
+    case 'admin/help#field_load_more':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Provides configuration to load n items of a multi-valued field with a load more button.') . '</p>';
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_field_formatter_info_alter().
+ */
+function field_load_more_field_formatter_info_alter(array &$info) {
+  foreach($info as $info_key => $info_val) {
+    $info[$info_key]['settings']['load_more_items'] = 5;
+    $info[$info_key]['settings']['field_load_more_enabled'] = 0;
+  }
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary_alter().
+ */
+function field_load_more_field_formatter_settings_summary_alter(&$summary, $context) {
+  dpm($context);
+  $view_mode = $context['view_mode'];
+  $field_load_more_enabled = $context['instance']['display'][$view_mode]['settings']['field_load_more_enabled'];
+  if ($field_load_more_enabled) {
+    $summary = t('Field load more enabled:Yes');
+  }
+}
+
+/**
+ * Implements hook_field_formatter_settings_form_alter().
+ */
+function field_load_more_field_formatter_settings_form_alter(&$settings_form, $context) {
+    $display = $context['instance']['display'][$context['view_mode']];
+    $settings = $display['settings'];
+    $cardinality = $context['field']['cardinality'];
+    if ($cardinality == -1) {
+      $settings_form['field_load_more_enabled'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Enable Load more widget for the field'),
+        '#default_value' => $settings['field_load_more_enabled'],
+      );
+
+      $settings_form['load_more_items'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Number of items to display by default'),
+        '#description' => t('if the number of items in this field exceeds this value, they will be displayed with a load more button.'),
+        '#default_value' => $settings['load_more_items'],
+      );
+
+    }
+    return $settings_form;
+}
+
+/**
+ * Implements hook_preprocess_field().
+ */
+function field_load_more_preprocess_field(&$variables) {
+  $element = $variables['element'];
+  $entity_type = $variables['element']['#entity_type'];
+  $field_name  = $variables['element']['#field_name'];
+  $bundle      = $variables['element']['#bundle'];
+  $view_mode   = $variables['element']['#view_mode'];
+
+  $formatter_settings = field_formatter_settings_get_instance_display_settings($entity_type, $field_name, $bundle, $view_mode);
+
+  if ($formatter_settings['field_load_more_enabled'] == 1) {
+
+    $variables['classes_array'][] = 'field-load-more';
+    $variables['#attached']['library'][] = 'field_load_more/loader';
+    $items_show_limit = $formatter_settings['load_more_items'];
+    $field_wrapper_class = 'field--name-' . str_replace('_', '-',$element['#field_name']);
+    drupal_add_js(array('field_load_more' => array('items' => $items_show_limit)), 'setting');
+
+    foreach ($variables['items'] as $key => $item) {
+      if ($key > $items_show_limit - 1) {
+        $variables['items'][$key]['#prefix'] = '<div class="element-invisible">';
+        $variables['items'][$key]['#suffix'] = '</div>';
+      }
+    }
+    if (count($variables['items']) > $items_show_limit) {
+      $variables['items'][]['content'] = array(
+        '#markup' => '<button class="load-more-btn button" data-field-class="' . $field_wrapper_class . '">Load more</button>',
+        '#cache' => array(
+          'tags' => array(
+            $items_show_limit . '-' . $element['#field_name'],
+          ),
+        )
+      );
+    }
+  }
+
+}
