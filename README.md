@@ -39,12 +39,11 @@ How To Install The Modules
 
 1. The Field Load More project installs like any other Drupal module. There is extensive
 documentation on how to do this here:
-https://drupal.org/documentation/install/modules-themes/modules-8 But essentially:
-Download the tarball and expand it into the modules/ directory in your Drupal 8
+https://www.drupal.org/docs/7/extending-drupal-7/installing-contributed-modules-find-import-enable-configure-drupal-7 But essentially:
+Download the tarball and expand it into the modules/ directory in your Drupal 7
 installation.
 
-2. Within Drupal, enable any Field Load More module in Admin
-menu > Extend.
+2. Within Drupal, enable any Field Load More module in Admin menu > modules.
 
 3. Settings of Field Load More will show in Manage Display tab for individual content
 type, which have multivalued field, with unlimited cadinality.
